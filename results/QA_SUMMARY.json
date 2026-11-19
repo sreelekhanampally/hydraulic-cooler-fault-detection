@@ -1,0 +1,59 @@
+{
+  "status": "passed",
+  "checked_on": "2026-11-15",
+  "python": "3.12.14",
+  "python_unittest_checks": 38,
+  "python_unittest_result": "38 passed",
+  "javascript_python_oracle_cases": 304,
+  "javascript_log_score_max_absolute_error": 1.7621459846850485e-12,
+  "javascript_probability_max_absolute_error": 4.996003610813204e-16,
+  "executed_notebook_code_cells": 14,
+  "notebook_total_cells": 29,
+  "report_pages": 28,
+  "report_chapters": 27,
+  "rendered_equations": 35,
+  "figures": 16,
+  "figure_formats": [
+    "PNG",
+    "vector PDF"
+  ],
+  "report_visual_review": "The original 28 pages were inspected. The revised presentation walkthrough on page 24 was rendered and visually rechecked; page count remains 28 with no short spill pages.",
+  "fresh_folder_reproduction": {
+    "raw_archive_reextracted": true,
+    "full_pipeline_exit_code": 0,
+    "all_2205_feature_rows_numerically_equal_at_1e_minus_12": true,
+    "maximum_feature_difference": 9.999732162105368e-17,
+    "analysis_identical_except_elapsed_seconds": true,
+    "checks_repeated_in_fresh_folder": "38 Python checks and 304 JavaScript oracle cases passed"
+  },
+  "browser_checks": [
+    "All 14 revised slides inspected from beginning to end in presentation mode; no horizontal document overflow or KaTeX errors.",
+    "Zero decorative panel, metric, finding, status or step boxes in the slide content.",
+    "Slide 13 is Test our model; slide 14 is Conclusion; no presentation-guide slide remains.",
+    "All three recorded examples classify correctly with all six readings and with TS2 removed.",
+    "Temperature-only model without TS2 returns its learned class proportions.",
+    "Edited numeric inputs and slider changes update the prediction and visible score table.",
+    "Blank observed readings clear stale output; blank unavailable TS2 readings do not block the marginal model.",
+    "All three covariance and normality selector choices show the corresponding graph and numerical interpretation.",
+    "All three MANOVA null references display 999 draws and p=.001; 500-draw replay displays p=.002.",
+    "Presentation mode, right-arrow navigation to the final conclusion and Escape exit work."
+  ],
+  "offline_assets": "Plotly, KaTeX, all 20 WOFF2 font paths and linked report are local",
+  "statistical_oracles": [
+    "MANOVA versus independent statsmodels OLS projection",
+    "Gaussian scores versus scipy.stats.multivariate_normal.logpdf",
+    "Covariance LRT versus direct maximized Gaussian log likelihood",
+    "Hotelling T2 versus t squared for p=1; affine invariance checks",
+    "Mardia versus independently whitened distances; affine invariance checks",
+    "Analytical Gaussian MLE versus numerical optimization"
+  ],
+  "scope": "Tests verify the supplied calculations and software; they do not establish future-machine validity.",
+  "presentation_revision": {
+    "slides": 14,
+    "suggested_minutes": "20\u201330",
+    "title": "Multivariate Statistical Diagnosis of Hydraulic Cooler Faults",
+    "style": "Plain bullet points and unboxed explanations with retained interactive graphs.",
+    "model_controls": "One recorded-example selector; plain cycle description; numeric inputs and sliders.",
+    "reference": "User-supplied LSIP presentation used for plain-language layout inspiration; text written for the hydraulic analysis."
+  }
+}

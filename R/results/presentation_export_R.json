@@ -1,0 +1,9 @@
+{
+  "language": "R",
+  "analysis_sha256": "386228529a8c218e5f82d6aab4c2af7ffffbdbab291f60e7edd25c5d8eab9594",
+  "browser_data_sha256": "7f5009955f3b898a4ac40b03b97b9a7403b44decc2dfd2d074d2ce691fceaa62",
+  "cycles": 2205,
+  "profiles": 144,
+  "oracle_cases": 304,
+  "note": "Statistical results and all fitted parameters exported by R; browser scripts display results and score inputs."
+}

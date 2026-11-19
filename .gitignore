@@ -1,0 +1,51 @@
+
+# R temporary files and workspace
+.Rhistory
+.RData
+.Ruserdata
+.Rproj.user/
+.Renviron
+
+# R session and cache
+.Rcache/
+.Rcheck/
+renv/library/
+renv/staging/
+*.Rcheck/
+
+# Python files (if used)
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Environment variables and secrets
+.env
+.env.*
+!.env.example
+*.key
+
+# Temporary files
+*.tmp
+*.temp
+*.log
+*.bak
+*~
+
+# Operating system
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE settings
+.vscode/
+.idea/
+
+# Generated temporary outputs
+.cache/
+tmp/
+temp/
+
+# Deployment
+node_modules/
+dist/

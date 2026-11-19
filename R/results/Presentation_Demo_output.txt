@@ -1,0 +1,352 @@
+
+> source("R/statistics_core.R")
+
+> source("R/inference.R")
+
+> source("R/training.R")
+
+> source("R/predict.R")
+
+> cycles <- read.csv("R/data/cycle_features_R.csv")
+
+> profiles <- read.csv("R/data/matched_profiles_R.csv")
+
+> results <- readRDS("R/results/analysis_R.rds")
+
+> features <- CORE
+
+> nrow(cycles)
+[1] 2205
+
+> sum(cycles$unstable == 0)
+[1] 1449
+
+> table(profiles$cooler)
+
+  3  20 100 
+ 48  48  48 
+
+> head(profiles[, c("cooler", features)])
+  cooler TS2_mean   TS2_slope FS1_mean  PS2_std EPS1_mean  VS1_mean
+1      3 59.46378 0.005001295 6.597689 45.72960  2394.528 0.6584533
+2     20 50.50120 0.005142151 6.675860 46.39749  2451.588 0.6058800
+3    100 41.88907 0.002094429 6.708272 47.17090  2533.791 0.5522317
+4      3 58.74536 0.005195804 5.951233 46.69519  2440.006 0.6765433
+5     20 50.81726 0.004049269 6.364801 46.13737  2467.283 0.6245317
+6    100 41.30087 0.002193826 6.431944 46.98772  2576.702 0.5358633
+
+> full <- profiles[profiles$cooler == 100, features]
+
+> reduced <- profiles[profiles$cooler == 20, features]
+
+> near <- profiles[profiles$cooler == 3, features]
+
+> means <- rbind(Full = colMeans(full), Reduced = colMeans(reduced), 
++     Near_failure = colMeans(near))
+
+> round(means, 4)
+             TS2_mean TS2_slope FS1_mean PS2_std EPS1_mean VS1_mean
+Full          41.6427    0.0026   6.5292 47.3221  2552.380   0.5456
+Reduced       49.7230    0.0043   6.4887 46.6108  2471.899   0.6143
+Near_failure  60.1864    0.0014   4.9187 51.1963  2504.401   0.6963
+
+> cov(near)
+               TS2_mean     TS2_slope      FS1_mean      PS2_std     EPS1_mean
+TS2_mean   0.8870677468 -9.162296e-04 -2.395824e-01   0.96698615     8.3599859
+TS2_slope -0.0009162296  1.668041e-05  5.600293e-03  -0.01926359    -0.3998138
+FS1_mean  -0.2395824237  5.600293e-03  1.926926e+00  -6.59255914  -138.2971575
+PS2_std    0.9669861521 -1.926359e-02 -6.592559e+00  22.68615696   472.1796598
+EPS1_mean  8.3599859403 -3.998138e-01 -1.382972e+02 472.17965979 10059.2482864
+VS1_mean   0.0036026041 -1.237227e-04 -4.369507e-02   0.15113163     3.1623236
+               VS1_mean
+TS2_mean   0.0036026041
+TS2_slope -0.0001237227
+FS1_mean  -0.0436950746
+PS2_std    0.1511316274
+EPS1_mean  3.1623235994
+VS1_mean   0.0013252061
+
+> round(cor(near), 3)
+          TS2_mean TS2_slope FS1_mean PS2_std EPS1_mean VS1_mean
+TS2_mean     1.000    -0.238   -0.183   0.216     0.089    0.105
+TS2_slope   -0.238     1.000    0.988  -0.990    -0.976   -0.832
+FS1_mean    -0.183     0.988    1.000  -0.997    -0.993   -0.865
+PS2_std      0.216    -0.990   -0.997   1.000     0.988    0.872
+EPS1_mean    0.089    -0.976   -0.993   0.988     1.000    0.866
+VS1_mean     0.105    -0.832   -0.865   0.872     0.866    1.000
+
+> common_scale <- fit_scaler(profiles[, features])
+
+> z <- apply_scaler(profiles[, features], common_scale)
+
+> groups <- lapply(CLASS_ORDER, function(k) z[profiles$cooler == 
++     k, ])
+
+> spread <- sapply(groups, function(x) det(cov(x))^(1/6))
+
+> names(spread) <- c("Full", "Reduced", "Near failure")
+
+> spread
+        Full      Reduced Near failure 
+ 0.006756058  0.007132660  0.041053620 
+
+> spread[3]/spread[1]
+Near failure 
+    6.076564 
+
+> mardia_statistics(groups[[3]])
+$n
+[1] 48
+
+$p
+[1] 6
+
+$skewness
+[1] 13.63089
+
+$kurtosis
+[1] 44.16451
+
+$normal_kurtosis
+[1] 48
+
+$skew_chi2
+[1] 109.0472
+
+$skew_df
+[1] 56
+
+$skew_p_asymptotic
+[1] 2.850264e-05
+
+$kurtosis_z
+[1] -1.356051
+
+$kurtosis_p_asymptotic
+[1] 0.175083
+
+
+> results$distribution_checks$groups[[3]][c("skew_p_mc", 
++     "kurtosis_p_mc")]
+$skew_p_mc
+[1] 0.001
+
+$kurtosis_p_mc
+[1] 0.436
+
+
+> mean_ML <- colMeans(groups[[1]])
+
+> n <- nrow(groups[[1]])
+
+> covariance_ML <- cov(groups[[1]]) * (n - 1)/n
+
+> mean_ML
+   TS2_mean   TS2_slope    FS1_mean     PS2_std   EPS1_mean    VS1_mean 
+-1.16450020 -0.06664801  0.50211409 -0.31082909  0.64136321 -1.12115802 
+
+> covariance_ML
+               TS2_mean     TS2_slope      FS1_mean       PS2_std    EPS1_mean
+TS2_mean   0.0014978204 -0.0024870142  0.0003062846 -0.0002196145 -0.002181453
+TS2_slope -0.0024870142  0.0443096276  0.0044584154  0.0039010040  0.000492806
+FS1_mean   0.0003062846  0.0044584154  0.0117805187  0.0019658445 -0.015895028
+PS2_std   -0.0002196145  0.0039010040  0.0019658445  0.0052781055 -0.002045869
+EPS1_mean -0.0021814531  0.0004928060 -0.0158950280 -0.0020458687  0.030319600
+VS1_mean  -0.0010431761  0.0008445399  0.0007803226  0.0014328078 -0.002817152
+               VS1_mean
+TS2_mean  -0.0010431761
+TS2_slope  0.0008445399
+FS1_mean   0.0007803226
+PS2_std    0.0014328078
+EPS1_mean -0.0028171517
+VS1_mean   0.0065968416
+
+> MLE_check <- numerical_mle_R(groups[[1]])
+
+> MLE_check[c("analytic_loglik", "numeric_loglik", "optimizer_success")]
+$analytic_loglik
+[1] 106.4315
+
+$numeric_loglik
+[1] 106.4315
+
+$optimizer_success
+[1] TRUE
+
+
+> fit <- manova(z ~ factor(setting) + factor(cooler), 
++     data = profiles)
+
+> summary(fit, test = "Wilks")
+                Df      Wilks approx F num Df den Df    Pr(>F)    
+factor(setting) 47 0.00077042     4.46    282 539.23 < 2.2e-16 ***
+factor(cooler)   2 0.00079112   512.54     12 178.00 < 2.2e-16 ***
+Residuals       94                                                
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+> summary(fit, test = "Roy")
+                Df    Roy approx F num Df den Df    Pr(>F)    
+factor(setting) 47 112.98    226.0     47     94 < 2.2e-16 ***
+factor(cooler)   2 251.25   3768.8      6     90 < 2.2e-16 ***
+Residuals       94                                            
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+> pair <- merge(profiles[profiles$cooler == 100, c("setting", 
++     features)], profiles[profiles$cooler == 20, c("setting", 
++     features)], by =  .... [TRUNCATED] 
+
+> differences <- as.matrix(pair[, paste0(features, "_reduced")]) - 
++     as.matrix(pair[, paste0(features, "_full")])
+
+> paired_hotelling(differences)[c("T2", "F", "p_iid")]
+$T2
+[1] 17168.87
+
+$F
+[1] 2557.066
+
+$p_iid
+[1] 3.634112e-52
+
+
+> p_values <- sapply(results$hotelling, function(x) x$p_iid)
+
+> p.adjust(p_values, method = "holm")
+[1] 7.268223e-52 1.383362e-56 1.377481e-41
+
+> box_m(groups)[c("M", "chi2", "df", "p_iid")]
+$M
+[1] 732.2726
+
+$chi2
+[1] 688.2522
+
+$df
+[1] 42
+
+$p_iid
+[1] 8.357598e-118
+
+
+> covariance_lrt(groups)
+$LR
+[1] 747.8529
+
+$df
+[1] 42
+
+$p_iid
+[1] 5.002714e-130
+
+
+> controls <- model.matrix(~factor(cooler) + factor(valve) + 
++     factor(pump) + factor(accumulator), data = profiles)
+
+> residuals <- lm.fit(controls, z)$residuals
+
+> cor(z)[1, 6]
+[1] 0.9441604
+
+> cor(residuals)[1, 6]
+[1] 0.2061392
+
+> sapply(results$manova$resampling, function(x) x$p_mc)
+ gaussian_iid_null    wild_restricted wild_full_residual 
+             0.001              0.001              0.001 
+
+> results$holdout_block_bootstrap$TS2_unavailable[c("lower", 
++     "upper")]
+$lower
+[1] 1
+
+$upper
+[1] 1
+
+
+> results$selected_model
+[1] "shared"
+
+> train <- cycles[cycles$cycle_id %in% results$development_cycles, 
++     ]
+
+> test <- cycles[cycles$cycle_id %in% results$test_cycles, 
++     ]
+
+> nrow(train)
+[1] 1089
+
+> nrow(test)
+[1] 360
+
+> scaler <- fit_scaler(train[, features])
+
+> z_train <- apply_scaler(train[, features], scaler)
+
+> z_test <- apply_scaler(test[, features], scaler)
+
+> model <- fit_gaussian(z_train, train$cooler, kind = "shared", 
++     alpha = 0)
+
+> probability <- predict_gaussian(model, z_test)
+
+> predicted <- CLASS_ORDER[max.col(probability, ties.method = "first")]
+
+> table(Recorded = test$cooler, Predicted = predicted)
+        Predicted
+Recorded   3  20 100
+     3   120   0   0
+     20    0 120   0
+     100   0   0 120
+
+> mean(predicted == test$cooler)
+[1] 1
+
+> probability_without_TS2 <- predict_gaussian(model, 
++     z_test, available = 3:6)
+
+> predicted_without_TS2 <- CLASS_ORDER[max.col(probability_without_TS2, 
++     ties.method = "first")]
+
+> table(Recorded = test$cooler, Predicted = predicted_without_TS2)
+        Predicted
+Recorded   3  20 100
+     3   120   0   0
+     20    0 120   0
+     100   0   0 120
+
+> saved_model <- readRDS("R/models/trained_gaussian_model.rds")
+
+> example <- test[test$cooler == 3, ][1, ]
+
+> predict_frame_R(saved_model, example)
+  cycle_id predicted_cooler predicted_condition probability_100 log_score_100
+1      212                3        Near failure   3.888181e-162     -380.2994
+  probability_20 log_score_20 probability_3 log_score_3 observed_coordinates
+1   1.837897e-46    -113.9488             1   -8.638526                    6
+  scenario
+1   intact
+
+> example$TS2_mean <- example$TS2_mean - 8
+
+> predict_frame_R(saved_model, example)
+  cycle_id predicted_cooler predicted_condition probability_100 log_score_100
+1      212               20  Reduced efficiency    3.422826e-56     -158.3371
+  probability_20 log_score_20 probability_3 log_score_3 observed_coordinates
+1              1    -30.62276  6.912756e-51   -146.1212                    6
+  scenario
+1   intact
+
+> predict_frame_R(saved_model, example, without_temperature = TRUE)
+  cycle_id predicted_cooler predicted_condition probability_100 log_score_100
+1      212                3        Near failure    9.158575e-60     -144.4556
+  probability_20 log_score_20 probability_3 log_score_3 observed_coordinates
+1   3.252869e-08    -25.75632             1   -8.515182                    4
+         scenario
+1 TS2 unavailable
+
+> results$transition_stress$accuracy
+[1] 0.8721805
+
+Demonstration completed successfully.

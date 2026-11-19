@@ -1,0 +1,25 @@
+{
+  "source_url": "https://archive.ics.uci.edu/static/public/447/condition+monitoring+of+hydraulic+systems.zip",
+  "doi": "10.24432/C5CW21",
+  "sha256": "24128aad2ee45eea7e6b63ebbd9992cdf25d0483a2cebefbfc13bc69079af1f2",
+  "archive_bytes": 76601704,
+  "cycles": 2205,
+  "cycle_seconds": 60,
+  "physical_sensor_count": 14,
+  "excluded_virtual_channels": [
+    "CE",
+    "CP",
+    "SE"
+  ],
+  "core_features": [
+    "TS2_mean",
+    "TS2_slope",
+    "FS1_mean",
+    "PS2_std",
+    "EPS1_mean",
+    "VS1_mean"
+  ],
+  "license": "CC BY 4.0",
+  "accessed": "2026-11-15",
+  "creators": "Nikolai Helwig, Eliseo Pignanelli, Andreas Schuetze"
+}

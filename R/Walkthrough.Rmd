@@ -1,0 +1,189 @@
+---
+title: "Hydraulic Cooler Fault Diagnosis in R"
+output:
+  html_document:
+    toc: true
+    number_sections: false
+---
+
+The presentation displays these R results. This notebook explains the statistical analysis and model training implemented in R. Run `source("run_project.R")` from the project root first. Knitting this optional document requires `rmarkdown` and `knitr`; the main R workflow does not.
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo=TRUE,warning=FALSE,message=FALSE)
+root <- if(file.exists('Hydraulic_Cooler_Statistics.Rproj'))getwd() else normalizePath('..')
+for(f in c('statistics_core.R','extract_features.R','inference.R','training.R','predict.R'))
+  source(file.path(root,'R',f))
+r <- readRDS(file.path(root,'R/results/analysis_R.rds'))
+d <- read.csv(file.path(root,'R/data/cycle_features_R.csv'))
+p <- read.csv(file.path(root,'R/data/matched_profiles_R.csv'))
+z <- apply_scaler(p[,CORE],r$reference_scale)
+groups <- lapply(CLASS_ORDER,function(k)z[p$cooler==k,,drop=FALSE])
+```
+
+## Data and design
+
+The archive has 2,205 60-second cycles, including 1,449 marked stable. The same 48 valve × pump × accumulator settings occur under all three cooler conditions. We average stable cycles within each setting-condition cell for inference. Cooler condition and recording phase coincide, so a mean contrast does not identify a causal cooler effect.
+
+```{r design}
+table(d$cooler,d$unstable)
+c(development_settings=length(r$split$development_settings),
+  test_settings=length(r$split$test_settings))
+stopifnot(!any(r$split$development_settings %in% r$split$test_settings))
+```
+
+## Mean vector
+
+For each condition, average every coordinate across its 48 matched profiles:
+
+$$\bar{\mathbf x}_k=\frac{1}{48}\sum_{s=1}^{48}\mathbf x_{sk}.$$
+
+```{r means}
+aggregate(p[,CORE],list(cooler=p$cooler),mean)
+```
+
+## Covariance and correlation
+
+The sample covariance uses divisor n − 1. Correlation rescales it to a dimensionless linear association.
+
+```{r covariance}
+S <- covariance_matrix(groups[[1]])
+S
+cov2cor(S)
+stopifnot(isTRUE(all.equal(S,cov(groups[[1]]))))
+```
+
+## Generalized variance
+
+$$GV=|S|,\qquad SGV=|S|^{1/6}.$$
+
+We keep one common scale across all three groups. Separate within-group standardization would change the quantity being compared.
+
+```{r generalized}
+sapply(groups,function(x)c(log_GV=logdet_spd(cov(x)),SGV=exp(logdet_spd(cov(x))/6)))
+```
+
+## Skewness, kurtosis and distribution checks
+
+Mardia's joint measures check the within-condition Gaussian approximation. R generates an independent finite-sample Gaussian reference at n = 48 and p = 6. The slides use these same R Monte Carlo values.
+
+```{r normality}
+lapply(groups,mardia_statistics)
+lapply(r$distribution_checks$groups,function(g)c(cooler=g$cooler,skew_p=g$skew_p_mc,kurtosis_p=g$kurtosis_p_mc))
+```
+
+## Maximum likelihood estimation
+
+$$\widehat\mu=\bar{\mathbf x},\qquad\widehat\Sigma_{ML}=\frac{n-1}{n}S.$$
+
+The bivariate demonstration fits temperature and power using `optim()` with BFGS and an analytical gradient. The fitted parameters are means, log standard deviations and atanh(correlation).
+
+```{r mle}
+fit <- numerical_mle_R(groups[[1]])
+fit[c('analytic_loglik','numeric_loglik','optimizer_success','max_parameter_gap')]
+```
+
+## MANOVA
+
+The model gives every matched setting its own baseline:
+
+$$\mathbf Y_{sk}=\alpha_s+\tau_k+\varepsilon_{sk}.$$
+
+```{r manova}
+fit_manova <- manova(z ~ factor(p$setting)+factor(p$cooler))
+summary(fit_manova,test='Wilks')
+summary(fit_manova,test='Pillai')
+summary(fit_manova,test='Roy')
+r$manova$roots
+```
+
+The slides use R's native Hotelling-Lawley approximation. The compatibility function below retains an alternative reference for comparison with the original calculation; it is not needed to explain the slides.
+
+```{r hl-reference}
+summary(fit_manova,test='Hotelling-Lawley')
+hl_presentation_reference_R(r$manova)
+```
+
+## Paired Hotelling T²
+
+We compare profiles from the same setting. For each pair there are 48 six-dimensional difference vectors:
+
+$$T^2=48\bar{\mathbf d}^{T}S_d^{-1}\bar{\mathbf d}.$$
+
+```{r hotelling}
+lapply(r$hotelling,function(h)c(from=h$from,to=h$to,T2=h$T2,Holm_p=h$p_holm_iid))
+first <- r$hotelling[[1]]$difference_rows
+paired_hotelling(first)
+```
+
+The confidence region concerns a mean difference, not a new individual cycle. Independent Gaussian differences are assumed for the F reference.
+
+## Covariance equality
+
+Box M uses unbiased covariance and residual-df weights. The Gaussian covariance likelihood ratio uses ML covariance and sample-size weights.
+
+```{r covariance-tests}
+box_m(groups)[c('M','correction','chi2','df','p_iid')]
+covariance_lrt(groups)
+```
+
+## Partial correlation and regression
+
+We adjust each feature for additive recorded component categories, then correlate the residuals. These labels are for explanation and never enter the diagnostic predictor.
+
+```{r partial}
+adjusted <- partial_regression_R(p,z)
+adjusted$raw_correlation
+adjusted$adjusted_correlation
+adjusted$temperature_R2_in_sample
+```
+
+The R² above is in-sample explanation, not held-out diagnostic accuracy.
+
+## Simulation and resampling
+
+$$\widehat p=\frac{1+\#\{T_b^*\geq T_{observed}\}}{B+1}.$$
+
+One sign is used for the entire setting block in matched wild resampling. Independent Gaussian nulls, restricted wild residuals and full-residual null-centred sensitivities remain separately labelled.
+
+```{r resampling}
+lapply(r$manova$resampling,function(v)c(B=v$B,critical_95=v$critical_95,p=v$p_mc))
+sapply(r$holdout_block_bootstrap,function(v)c(lower=v$lower,upper=v$upper))
+```
+
+A [1,1] empirical interval on an all-correct holdout does not prove zero future error. Matching and block resampling also cannot eliminate recording-phase confounding.
+
+## Model training and prediction
+
+The 36 development settings contain 1,089 stable cycles. Every development fold fits its own scaler. The 12 test settings are excluded from fitting and selection.
+
+```{r training}
+r$development_cv[order(r$development_cv$objective),][1:6,]
+r$selected_model
+r$models[[r$selected_model]]$alpha
+```
+
+The selected shared model has alpha zero. With TS2 unavailable, both temperature mean and slope are marginalized out. No fake zero sensor reading enters the density.
+
+```{r predict}
+bundle <- readRDS(file.path(root,'R/models/trained_gaussian_model.rds'))
+sample <- read.csv(file.path(root,'data/sample_inputs.csv'))
+predict_frame_R(bundle,sample)
+predict_frame_R(bundle,sample,without_temperature=TRUE)
+```
+
+## Validation and limitations
+
+```{r validation}
+lapply(r$predictive_results,function(v)c(intact=v$intact$balanced_accuracy,
+                                      without_TS2=v$TS2_unavailable$balanced_accuracy))
+r$transition_stress[c('n','accuracy','balanced_accuracy','confusion')]
+jsonlite::read_json(file.path(root,'R/results/QA_R.json'),simplifyVector=TRUE)
+```
+
+Both temperature-only and the joint model are perfect on the intact stable holdout. The demonstrated contribution is fallback without TS2. Transition cycles show errors. One rig with three recording phases cannot establish reliable deployment on new machines.
+
+## References
+
+- UCI dataset 447, Helwig, Pignanelli and Schütze, DOI [10.24432/C5CW21](https://doi.org/10.24432/C5CW21), CC BY 4.0.
+- R documentation for [summary.manova](https://search.r-project.org/R/refmans/stats/html/summary.manova.html) and [optim](https://stat.ethz.ch/R-manual/R-patched/library/stats/html/optim.html).
+- Mardia (1970), DOI [10.1093/biomet/57.3.519](https://doi.org/10.1093/biomet/57.3.519).

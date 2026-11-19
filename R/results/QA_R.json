@@ -1,0 +1,17 @@
+{
+  "language": "R",
+  "status": "passed",
+  "checks": 63,
+  "passed": 63,
+  "failed": 0,
+  "R_version": "R version 4.5.0 (2025-04-11)",
+  "raw_feature_max_absolute_difference": 3.3301148505415767e-09,
+  "browser_oracle_cases": 304,
+  "browser_max_log_score_absolute_difference": 6.6762140704668127e-08,
+  "browser_max_log_score_relative_difference": 9.370308546721207e-11,
+  "browser_max_probability_difference": 9.5223828822099676e-13,
+  "presentation_results_from_R": true,
+  "browser_data_sha256": "7f5009955f3b898a4ac40b03b97b9a7403b44decc2dfd2d074d2ce691fceaa62",
+  "implementation": "Native R statistical calculations, resampling, training, prediction, plotting and checks; no Python runtime invoked.",
+  "note": "Original JSON and browser oracle cases are read only for post-fit verification. R simulations use their own RNG stream."
+}

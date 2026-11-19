@@ -1,0 +1,17 @@
+{
+  "python": "3.12.14",
+  "packages": {
+    "numpy": "2.3.5",
+    "pandas": "2.2.3",
+    "scipy": "1.17.0",
+    "scikit-learn": "1.8.0",
+    "matplotlib": "3.10.8",
+    "reportlab": "4.4.9",
+    "Pillow": "13.0.0",
+    "statsmodels": "0.14.5",
+    "patsy": "1.0.2",
+    "nbformat": "5.10.4"
+  },
+  "seed": 20261115,
+  "platform_note": "Supplied results generated on Linux; code uses portable filesystem paths."
+}

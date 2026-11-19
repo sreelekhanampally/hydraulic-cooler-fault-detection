@@ -1,0 +1,13 @@
+# Python 3.12 used for the supplied numerical results.
+numpy==2.3.5
+pandas==2.2.3
+scipy==1.17.0
+scikit-learn==1.8.0
+statsmodels==0.14.5
+patsy==1.0.2
+matplotlib==3.10.8
+reportlab==4.4.9
+Pillow==13.0.0
+nbformat==5.10.4
+# Optional notebook interface: pip install jupyterlab
+# Optional JavaScript oracle verification: install Node.js 18 or later.
