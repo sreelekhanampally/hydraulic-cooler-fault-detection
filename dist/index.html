@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Multivariate Statistical Diagnosis of Hydraulic Cooler Faults: a 14-slide presentation and interactive model.">
+  <title>Hydraulic Fault Statistics Lab</title>
+  <link rel="stylesheet" href="vendor/katex.min.css">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <aside class="sidebar" aria-label="Project navigation">
+    <a class="brand" href="#overview">Hydraulic cooler<br>fault diagnosis</a>
+    <div class="sidebar-caption">Multivariate statistics project in R</div>
+    <nav id="navigation" aria-label="Slides"></nav>
+  </aside>
+  <div class="workspace">
+    <header class="topbar">
+      <label class="mobile-navigation">Slide <select id="mobile-chapter" aria-label="Select slide"></select></label>
+      <div class="breadcrumb">Multivariate statistics <span>·</span> <strong id="chapter-label">Project title and objective</strong></div>
+      <div class="top-actions"><a href="reports/Hydraulic_Statistics_Report.pdf" target="_blank" rel="noopener">Full report</a><button id="present" type="button">Present</button></div>
+    </header>
+    <main id="main" tabindex="-1"></main>
+    <footer class="page-footer"><span id="page-counter"></span><span>Helwig, Pignanelli &amp; Schütze · UCI · CC BY 4.0</span></footer>
+  </div>
+  <div class="presentation-controls" aria-label="Presentation controls"><button id="previous" type="button">← Previous</button><span id="presentation-counter"></span><button id="next" type="button">Next →</button><button id="exit-presentation" type="button">Exit presentation</button></div>
+  <script src="vendor/plotly.min.js"></script>
+  <script src="vendor/katex.min.js"></script>
+  <script src="lab-data.js"></script>
+  <script src="model.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
