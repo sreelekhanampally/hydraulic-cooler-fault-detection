@@ -37,7 +37,7 @@
     '<strong>2,205 cycles</strong>, each lasting 60 seconds. We use the 1,449 cycles marked stable for the main analysis.',
     'Six features: temperature mean and trend, mean flow, pressure fluctuation, mean power and mean vibration.',
     'R averages stable cycles within 48 matched operating settings for comparison. For prediction, 12 settings are kept out of training.'
-  ])+chart('recording-order','Mean temperature across the recording sequence');}
+  ])+`<p> Sreelekha Nampally , Sonam Kumari - Department of Mathematics and Computing, NIT MIZORAM </p>` + chart('recording-order','Mean temperature across the recording sequence');}
 
   function means(){return heading('Mean vector: the typical sensor profile')+points([
     'R calculates the six averages for each condition. Together, they describe its typical profile.'
