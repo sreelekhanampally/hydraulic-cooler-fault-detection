@@ -31,7 +31,7 @@
     'A hydraulic cooler removes heat from the system. We study how its recorded condition is reflected in temperature, flow, pressure, power and vibration.',
     'Our aim is to distinguish full efficiency, reduced efficiency and near failure from these readings, and check whether the model still works without its temperature sensor.',
     'In R, we compare the mean profiles and covariance, use MANOVA and Hotelling’s T² to test differences, and train a Gaussian model to predict the condition.'
-  ])+`<p class="source-line">Dataset: <a href="https://doi.org/10.24432/C5CW21" target="_blank" rel="noopener">UCI Condition Monitoring of Hydraulic Systems</a> · Helwig, Pignanelli &amp; Schütze · CC BY 4.0</p>`;}
+  ])+`<p>Sreelekha Nampally , Sonam Kumari - Department of Mathematics and Computing, NIT MIZORAM</p>` + `<p class="source-line">Dataset: <a href="https://doi.org/10.24432/C5CW21" target="_blank" rel="noopener">UCI Condition Monitoring of Hydraulic Systems</a> · Helwig, Pignanelli &amp; Schütze · CC BY 4.0</p>`;}
 
   
 function design() {
@@ -41,7 +41,6 @@ function design() {
       'Six features: temperature mean and trend, mean flow, pressure fluctuation, mean power and mean vibration.',
       'R averages stable cycles within 48 matched operating settings for comparison. For prediction, 12 settings are kept out of training.'
     ]) +
-    `<p>Sreelekha Nampally , Sonam Kumari - Department of Mathematics and Computing, NIT MIZORAM</p>` +
     chart('recording-order', 'Mean temperature across the recording sequence');
 }
 
